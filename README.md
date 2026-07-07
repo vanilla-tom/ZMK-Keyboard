@@ -18,7 +18,7 @@ URL: www.umux.com
 
 > **修改键位：**
 
-- 支持的键盘：p20n / p31n / p48n / x35n / x36n / x3n2
+- 支持的键盘：p20n / p31n / p48n / p61n / x35n / x36n / x3n2
 - 在线改键位：连 USB 打开网站https://zmk.studio/， 实时修改，不用重新编译
 - 改代码刷机：可安装本地编译环境，或使用以下的github Actions方式编译固件
    1. 改键 - 编辑对应键盘的 .keymap 文件。
@@ -29,7 +29,7 @@ URL: www.umux.com
 
 > **Edit Keymap**
 
-- Supported Keyboards: p20n / p31n / p48n / x35n / x36n / x3n2
+- Supported Keyboards: p20n / p31n / p48n / p61n / x35n / x36n / x3n2
 
 - Edit Keymap Online: Connect via USB and open https://zmk.studio/ – modify your keymap in real time, no need to recompile.
 
