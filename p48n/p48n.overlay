@@ -11,7 +11,12 @@
 	chosen {
 		zmk,kscan = &kscan0;
         zmk,physical-layout = &physical_layout0;
+        zmk,battery = &p48n_vbatt;
 	};
+
+    p48n_vbatt: p48n-vbatt {
+        compatible = "zmk,battery-nrf-vddh";
+    };
 
 	kscan0: kscan {
 		compatible = "zmk,kscan-gpio-matrix";
@@ -54,4 +59,8 @@
         RC(3,0) RC(3,1) RC(3,2) RC(3,3) RC(3,4) RC(3,5) RC(3,6) RC(3,7) RC(3,8) RC(3,9) RC(3,10) RC(3,11)
 		>;
 	};
+};
+
+&vbatt {
+    status = "disabled";
 };
