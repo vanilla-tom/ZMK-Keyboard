@@ -1,0 +1,61 @@
+name: Build P48n Remote HID Probe
+
+on:
+  push:
+    branches:
+      - codex/remote-hid-probe
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: zmkfirmware/zmk-build-arm:stable
+
+    steps:
+      - name: Checkout keyboard configuration
+        uses: actions/checkout@v5
+
+      - name: Initialize west workspace
+        run: |
+          west init -l config/
+          west update
+          west zephyr-export
+
+      - name: Stage P48n shield outside the checkout
+        run: |
+          mkdir -p "$RUNNER_TEMP/p48n-board-root/boards/shields"
+          cp -R "$GITHUB_WORKSPACE/p48n" "$RUNNER_TEMP/p48n-board-root/boards/shields/p48n"
+
+      - name: Build feature-disabled baseline
+        run: |
+          west build -s zmk/app -b nrfmicro/nrf52840/zmk -d build-disabled -p always \
+            -S studio-rpc-usb-uart \
+            -- -DBOARD_ROOT="$RUNNER_TEMP/p48n-board-root" \
+               -DSHIELD=p48n \
+               -DCONFIG_ZMK_STUDIO=y
+
+      - name: Build stage-0 probe
+        run: |
+          west build -s zmk/app -b nrfmicro/nrf52840/zmk -d build-enabled -p always \
+            -S studio-rpc-usb-uart \
+            -- -DBOARD_ROOT="$RUNNER_TEMP/p48n-board-root" \
+               -DSHIELD=p48n \
+               -DEXTRA_CONF_FILE="$GITHUB_WORKSPACE/config/remote-hid-probe.conf" \
+               -DCONFIG_ZMK_STUDIO=y
+
+      - name: Upload stage-0 probe firmware
+        uses: actions/upload-artifact@v6
+        with:
+          name: p48n-remote-hid-stage0
+          path: build-enabled/zephyr/zmk.uf2
+          if-no-files-found: error
+
+      - name: Upload feature-disabled baseline
+        uses: actions/upload-artifact@v6
+        with:
+          name: p48n-feature-disabled-baseline
+          path: build-disabled/zephyr/zmk.uf2
+          if-no-files-found: error
