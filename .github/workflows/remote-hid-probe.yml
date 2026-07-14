@@ -1,4 +1,4 @@
-name: Build P48n Remote HID Probe
+name: Build P48n Remote HID Stage 1
 
 on:
   push:
@@ -24,6 +24,14 @@ jobs:
           west update
           west zephyr-export
 
+      - name: Test Remote HID state machine
+        run: |
+          cc -std=c11 -Wall -Wextra -Werror -I zmk/app/include \
+            zmk/app/src/remote_hid_bridge_state.c \
+            zmk/app/tests/remote_hid_bridge/remote_hid_bridge_state_test.c \
+            -o "$RUNNER_TEMP/remote-hid-state-test"
+          "$RUNNER_TEMP/remote-hid-state-test"
+
       - name: Stage P48n shield outside the checkout
         run: |
           mkdir -p "$RUNNER_TEMP/p48n-board-root/boards/shields"
@@ -37,19 +45,19 @@ jobs:
                -DSHIELD=p48n \
                -DCONFIG_ZMK_STUDIO=y
 
-      - name: Build stage-0 probe
+      - name: Build stage-1 keyboard route
         run: |
           west build -s zmk/app -b nrfmicro/nrf52840/zmk -d build-enabled -p always \
             -S studio-rpc-usb-uart \
             -- -DBOARD_ROOT="$RUNNER_TEMP/p48n-board-root" \
                -DSHIELD=p48n \
-               -DEXTRA_CONF_FILE="$GITHUB_WORKSPACE/config/remote-hid-probe.conf" \
+               -DEXTRA_CONF_FILE="$GITHUB_WORKSPACE/config/remote-hid-stage1.conf" \
                -DCONFIG_ZMK_STUDIO=y
 
-      - name: Upload stage-0 probe firmware
+      - name: Upload stage-1 firmware
         uses: actions/upload-artifact@v6
         with:
-          name: p48n-remote-hid-stage0
+          name: p48n-remote-hid-stage1
           path: build-enabled/zephyr/zmk.uf2
           if-no-files-found: error
 
